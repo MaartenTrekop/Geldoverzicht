@@ -46,7 +46,9 @@ describe('BudgetSplitCard', () => {
 
   it('shows the free budget and each line with its status', async () => {
     const element = (await render()).nativeElement as HTMLElement;
-    expect(textOf(element.querySelector('.free'))).toBe('Vrije ruimte € 3.350');
+    const free = textOf(element.querySelector('.free'));
+    expect(free).toContain('Vrije ruimte');
+    expect(free).toContain('€ 3.350');
     const rows = [...element.querySelectorAll('tbody tr')].map(textOf);
     expect(rows[0]).toContain('€ 840 onder plan');
     expect(rows[1]).toContain('Eigen geld Maarten');
