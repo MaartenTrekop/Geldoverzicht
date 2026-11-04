@@ -131,6 +131,7 @@ h2 {
 
 .pill {
   display: inline-block;
+  white-space: nowrap;
   background: var(--chip);
   border-radius: 20px;
   padding: 2px 9px;
