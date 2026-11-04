@@ -6,7 +6,14 @@ updates:
       interval: monthly
     groups:
       angular:
-        patterns: ['@angular/*', '@angular-devkit/*', 'typescript', 'vitest', 'jsdom']
+        patterns: ['@angular/*', 'vitest', 'jsdom']
+    ignore:
+      # Angular majors (and the TypeScript versions they support) go through `ng update`,
+      # which also runs the migrations.
+      - dependency-name: '@angular/*'
+        update-types: ['version-update:semver-major']
+      - dependency-name: 'typescript'
+        update-types: ['version-update:semver-major', 'version-update:semver-minor']
   - package-ecosystem: github-actions
     directory: /
     schedule:
