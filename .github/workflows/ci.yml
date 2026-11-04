@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, development]
   pull_request:
   workflow_dispatch:
 
@@ -30,8 +30,14 @@ jobs:
       - name: Unit tests
         run: npm run test:ci
 
+      - name: Local database API tests
+        run: npm run test:api
+
       - name: Production build
         run: npm run build
+
+      - name: Local database build
+        run: npx ng build --configuration local-db --output-path dist/local-db
 
       - name: Keep the build for inspection
         uses: actions/upload-artifact@v7

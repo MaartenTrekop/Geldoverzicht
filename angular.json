@@ -53,6 +53,17 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "local-db": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/persistence.ts",
+                  "with": "src/environments/persistence.local-db.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -65,6 +76,10 @@
             },
             "development": {
               "buildTarget": "geldoverzicht:build:development"
+            },
+            "local-db": {
+              "buildTarget": "geldoverzicht:build:local-db",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

@@ -42,3 +42,11 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Local data: never commit bank exports or the local database
+/.local-data/
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.csv

@@ -49,12 +49,42 @@ npm run build        # production build in dist/geldoverzicht/browser
 npm run format       # Prettier
 ```
 
+### Local SQLite database (development only)
+
+For testing locally with real data you can keep transactions and settings in a SQLite file on
+your own computer instead of in the browser. Requires Node.js 22.13+ (Node's built-in
+`node:sqlite`; it prints an "experimental" warning, which is harmless).
+
+```bash
+npm run start:local  # API + app on http://localhost:4200, data in .local-data/geldoverzicht.db
+# or in two terminals:
+npm run api          # local API on http://127.0.0.1:3333/api
+npx ng serve --configuration local-db
+npm run test:api     # API tests (node:test)
+```
+
+- The header shows **Lokale database** when this mode is active; a banner explains what to do
+  when the API is not running.
+- The database is a single file in `.local-data/` (override with `GELDOVERZICHT_DB=/path/file.db`,
+  the port with `PORT`). Open it with any SQLite tool, e.g. DB Browser for SQLite. Delete the
+  file to start fresh.
+- `.local-data/`, `*.db` and `*.csv` are git-ignored, so neither the database nor bank exports
+  end up in the (public) repository.
+- The API only listens on 127.0.0.1, only accepts requests addressed to localhost (protection
+  against DNS rebinding), rejects requests from other websites and only accepts JSON. Amounts
+  are stored in whole cents.
+- `npm start` and the GitHub Pages build keep using browser storage; only the `local-db`
+  configuration swaps in the database (via `fileReplacements` of `src/environments/persistence.ts`).
+
 ## Architecture
 
 Angular 22 (standalone components, signals, zoneless change detection, new control flow),
 TypeScript in strict mode, Vitest for unit tests.
 
 ```
+server/                Local SQLite API for development (node:http + node:sqlite)
+scripts/start-local.mjs  Starts the API and `ng serve --configuration local-db`
+src/environments/      Persistence providers per build configuration
 src/app
 ├── core/              Framework-free domain logic (pure TypeScript, no Angular imports)
 │   ├── models/        Transaction, category catalogue, owner, settings (+ safe parsing of stored settings)
@@ -65,6 +95,7 @@ src/app
 │   ├── settings/      Pure update functions for every user change
 │   └── demo/          Deterministic demo export
 ├── state/             Angular services holding state as signals
+│   ├── persistence/            where data is kept: browser (default) or local SQLite API
 │   ├── transactions-store.ts   imported transactions (persisted)
 │   ├── settings-store.ts       user configuration (persisted)
 │   ├── view-store.ts           what is on screen: period, filters, table paging
@@ -92,7 +123,9 @@ ViewStore ─────────┘          ▲                           
   as pure functions with unit tests: parsing, categorisation, fixed-cost detection, the budget
   split and pot projections. Settings changes are pure functions too (`settings-updates.ts`),
   so the stores stay thin.
-- **Stores** own state as signals and persist it with an `effect`. They never compute views.
+- **Stores** own state as signals and persist it through the `PERSISTENCE` interface
+  (`BrowserPersistence` or `LocalDbPersistence`). Stored data is loaded by an app initializer
+  before the first route resolves. Stores never compute views.
 - **The facade** combines the stores into view models with `computed` and is the only thing the
   dashboard talks to.
 - **Components** are `OnPush` and presentational: signal `input()`s in, `output()`s out. Only the
@@ -102,8 +135,10 @@ ViewStore ─────────┘          ▲                           
 
 ### Decisions
 
-- **No backend.** Bank data is sensitive; keeping it in the browser avoids accounts, hosting and
-  data protection obligations. The trade-off: data lives in one browser.
+- **No backend in production.** Bank data is sensitive; keeping it in the browser avoids
+  accounts, hosting and data protection obligations. The trade-off: data lives in one browser.
+  The SQLite API in `server/` is a local development tool and uses Node built-ins only, so it
+  adds no dependencies.
 - **Categories are identified by their Dutch name.** They are user-facing and user-defined; a
   separate id would add mapping without benefit here.
 - **Own-account transfers count as saving on the main account** and as internal on the other
@@ -116,10 +151,14 @@ ViewStore ─────────┘          ▲                           
 
 - domain specs in `core/**` (parsing, rules, analysis, settings updates, demo export),
 - store/facade integration specs using the demo data,
-- component specs for the KPI cards, budget split, chart, category select and the full dashboard.
+- component specs for the KPI cards, budget split, chart, category select and the full dashboard,
+- persistence specs (browser storage, HTTP calls to the local API, error handling).
+
+`npm run test:api` runs the local API tests against an in-memory SQLite database.
 
 ## Deployment
 
-- `.github/workflows/ci.yml` checks formatting, runs the tests and builds on every push and pull request.
+- `.github/workflows/ci.yml` checks formatting, runs the unit and API tests and builds (also the
+  `local-db` configuration) on pushes to `main` and `development` and on pull requests.
 - `.github/workflows/deploy.yml` builds `main` and publishes it to GitHub Pages. It skips (with a
   notice) until Pages is enabled with _GitHub Actions_ as the source.

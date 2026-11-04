@@ -4,12 +4,15 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "start:local": "node scripts/start-local.mjs",
+    "api": "node server/main.mjs",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "test:ci": "ng test --watch=false",
-    "format": "prettier --write \"src/**/*.{ts,html,scss}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,html,scss}\""
+    "test:api": "node --test \"server/**/*.test.mjs\"",
+    "format": "prettier --write \"src/**/*.{ts,html,scss}\" \"{server,scripts}/**/*.mjs\"",
+    "format:check": "prettier --check \"src/**/*.{ts,html,scss}\" \"{server,scripts}/**/*.mjs\""
   },
   "private": true,
   "packageManager": "npm@11.19.1",
