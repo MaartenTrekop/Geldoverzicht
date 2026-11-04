@@ -1,0 +1,88 @@
+@let g = geometry();
+
+<div class="chart" (mouseleave)="hovered.set(null)">
+  <svg
+    [attr.viewBox]="'0 0 ' + g.width + ' ' + height"
+    [attr.height]="height"
+    role="img"
+    aria-label="Inkomsten en uitgaven per maand"
+  >
+    @for (tick of g.ticks; track tick.label) {
+      <line
+        class="grid"
+        [class.zero]="tick.zero"
+        [attr.x1]="64"
+        [attr.x2]="g.width - 8"
+        [attr.y1]="tick.y"
+        [attr.y2]="tick.y"
+      />
+      <text class="axis" text-anchor="end" [attr.x]="56" [attr.y]="tick.y + 4">
+        {{ tick.label }}
+      </text>
+    }
+
+    @for (bar of g.bars; track bar.month; let i = $index) {
+      <g
+        class="month"
+        tabindex="0"
+        [class.selected]="bar.selected"
+        [class.dimmed]="bar.dimmed"
+        [attr.aria-label]="bar.month | monthLabel: 'long'"
+        (mouseenter)="hovered.set(i)"
+        (focus)="hovered.set(i)"
+        (click)="monthSelected.emit(bar.month)"
+        (keydown.enter)="monthSelected.emit(bar.month)"
+      >
+        <rect
+          class="hit"
+          rx="6"
+          [attr.x]="bar.x"
+          [attr.y]="10"
+          [attr.width]="bar.width"
+          [attr.height]="height - 10"
+        />
+        <rect
+          class="income"
+          rx="3"
+          [attr.x]="bar.center - g.barWidth - 1"
+          [attr.y]="bar.incomeY"
+          [attr.width]="g.barWidth"
+          [attr.height]="bar.incomeHeight"
+        />
+        <rect
+          class="expenses"
+          rx="3"
+          [attr.x]="bar.center + 1"
+          [attr.y]="bar.expensesY"
+          [attr.width]="g.barWidth"
+          [attr.height]="bar.expensesHeight"
+        />
+        @if (bar.label) {
+          <text class="axis label" text-anchor="middle" [attr.x]="bar.center" [attr.y]="height - 6">
+            {{ bar.label }}
+          </text>
+        }
+      </g>
+    }
+
+    <polyline class="leftover" [attr.points]="g.line" />
+    @for (bar of g.bars; track bar.month) {
+      <circle class="dot" r="2.8" [attr.cx]="bar.center" [attr.cy]="bar.leftoverY" />
+    }
+  </svg>
+
+  @if (tooltip(); as tip) {
+    <div class="tip" [style.left.px]="tip.left">
+      <strong>{{ tip.point.month | monthLabel: 'long' }}</strong>
+      <span class="positive">In {{ tip.point.income | euro }}</span>
+      <span class="negative">Uit {{ tip.point.expenses | euro }}</span>
+      <span>Over {{ tip.point.leftover | euro }}</span>
+    </div>
+  }
+</div>
+
+<div class="legend" aria-hidden="true">
+  <span><i class="income"></i>Inkomsten</span>
+  <span><i class="expenses"></i>Uitgaven</span>
+  <span><i class="line"></i>Over (na sparen)</span>
+</div>

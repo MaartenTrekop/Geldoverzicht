@@ -1,0 +1,85 @@
+@let p = period();
+
+<app-segmented-control
+  label="Weergave"
+  [large]="true"
+  [options]="modes"
+  [value]="p.mode"
+  (valueChange)="setMode($event)"
+/>
+
+@if (p.mode === 'month') {
+  <div class="month">
+    <button
+      type="button"
+      class="btn arrow"
+      aria-label="Vorige maand"
+      [disabled]="!p.canGoBack"
+      (click)="step.emit(-1)"
+    >
+      ‹
+    </button>
+    <select #month aria-label="Maand" (change)="monthChange.emit(month.value)">
+      @for (m of newestFirst(); track m) {
+        <option [value]="m" [selected]="m === p.month">
+          {{ m | monthLabel: 'long' }}{{ m === p.today ? ' (lopend)' : '' }}
+        </option>
+      }
+    </select>
+    <button
+      type="button"
+      class="btn arrow"
+      aria-label="Volgende maand"
+      [disabled]="!p.canGoForward"
+      (click)="step.emit(1)"
+    >
+      ›
+    </button>
+  </div>
+} @else {
+  <label>
+    Van
+    <select #from (change)="setRange(from.value, to.value)">
+      @for (m of p.available; track m) {
+        <option [value]="m" [selected]="m === p.from">{{ m | monthLabel }}</option>
+      }
+    </select>
+  </label>
+  <label>
+    t/m
+    <select #to (change)="setRange(from.value, to.value)">
+      @for (m of p.available; track m) {
+        <option [value]="m" [selected]="m === p.to">{{ m | monthLabel }}</option>
+      }
+    </select>
+  </label>
+  <button type="button" class="btn" (click)="quickRange.emit('last12')">12 mnd</button>
+  <button type="button" class="btn" (click)="quickRange.emit('thisYear')">Dit jaar</button>
+  <button type="button" class="btn" (click)="quickRange.emit('all')">Alles</button>
+}
+
+@if (p.accounts.length > 1) {
+  <label>
+    Rekening
+    <select #account (change)="accountChange.emit(account.value)">
+      <option value="all" [selected]="p.account === 'all'">Alle rekeningen</option>
+      @for (a of p.accounts; track a.iban) {
+        <option [value]="a.iban" [selected]="a.iban === p.account">{{ a.label }}</option>
+      }
+    </select>
+  </label>
+}
+
+<label>
+  Bekijk
+  <app-owner-select
+    label="Bekijk geld van"
+    allLabel="Iedereen"
+    [value]="owner()"
+    [names]="names()"
+    (changed)="ownerChange.emit($event)"
+  />
+</label>
+
+<span class="spacer"></span>
+<span class="sub">{{ summary() }}</span>

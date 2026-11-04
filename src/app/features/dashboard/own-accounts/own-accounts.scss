@@ -1,0 +1,44 @@
+.account {
+  display: grid;
+  grid-template-columns: 1.4fr 120px 1fr 150px;
+  gap: 14px;
+  align-items: center;
+  padding: 10px 2px;
+  border-bottom: 1px solid var(--line);
+
+  &:last-of-type {
+    border-bottom: 0;
+  }
+
+  input {
+    width: 100%;
+    max-width: 260px;
+    font-weight: 600;
+    padding: 6px 9px;
+  }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  select {
+    color: var(--ink);
+    font-size: 13px;
+  }
+}
+
+.iban {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+@media (max-width: 900px) {
+  .account {
+    grid-template-columns: 1fr 1fr;
+  }
+}

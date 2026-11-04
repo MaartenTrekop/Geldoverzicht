@@ -1,0 +1,66 @@
+.drop {
+  border: 2px dashed var(--line);
+  border-radius: 16px;
+  padding: 48px 24px;
+  text-align: center;
+  background: var(--card);
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+
+  &.dragging {
+    border-color: var(--income);
+    background: var(--income-soft);
+  }
+
+  h2 {
+    font-size: 20px;
+    margin-bottom: 6px;
+  }
+}
+
+.lead {
+  color: var(--muted);
+  margin: 6px auto 18px;
+  max-width: 620px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.privacy {
+  font-size: 12.5px;
+  color: var(--muted);
+  margin-top: 14px;
+}
+
+.errors {
+  background: var(--expense-soft);
+  border-radius: 10px;
+  padding: 10px 14px 10px 30px;
+  margin: 14px auto 0;
+  max-width: 620px;
+  text-align: left;
+  font-size: 13.5px;
+}
+
+.howto {
+  margin: 22px auto 0;
+  max-width: 620px;
+  text-align: left;
+  font-size: 13.5px;
+  color: var(--muted);
+
+  ol {
+    margin: 6px 0;
+    padding-left: 20px;
+  }
+
+  p {
+    margin: 6px 0 0;
+  }
+}

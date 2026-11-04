@@ -1,0 +1,128 @@
+@let period = facade.periodVm();
+
+<app-period-toolbar
+  [period]="period"
+  [names]="names()"
+  [owner]="facade.ownerView()"
+  (modeChange)="facade.setMode($event)"
+  (monthChange)="facade.showMonth($event)"
+  (step)="facade.stepMonth($event)"
+  (rangeChange)="facade.showRange($event.from, $event.to)"
+  (quickRange)="facade.showQuickRange($event)"
+  (accountChange)="facade.setAccount($event)"
+  (ownerChange)="setOwnerView($event)"
+/>
+
+<app-kpi-summary class="section" [kpis]="facade.kpis()" />
+
+<app-budget-split
+  class="card section"
+  [split]="facade.budget()"
+  [mode]="facade.settings().split.mode"
+  [names]="names()"
+  [heading]="splitHeading()"
+  [subtitle]="splitSubtitle()"
+  [isMonth]="period.mode === 'month'"
+  [pots]="facade.settings().savingsPots"
+  (valueChange)="facade.setSplitValue($event.line, $event.value)"
+  (modeChange)="facade.setSplitMode($event)"
+  (householdChange)="facade.setHouseholdBudget($event)"
+  (rename)="facade.renamePerson($event.index, $event.name)"
+  (categorySelect)="facade.showCategoryOf($event.category, $event.owner)"
+/>
+
+<app-savings-pots
+  class="card section"
+  [pots]="facade.pots()"
+  [accounts]="facade.linkableAccounts()"
+  [exportedAccounts]="exportedAccounts()"
+  [names]="names()"
+  [isMonth]="period.mode === 'month'"
+  [monthCount]="period.monthCount"
+  (saved)="facade.savePot($event)"
+  (removed)="facade.removePot($event)"
+/>
+
+<div class="columns wide-left section">
+  <section class="card">
+    <h2>
+      {{ period.mode === 'month' ? 'Afgelopen maanden' : 'Per maand' }} ·
+      <span class="sub">klik op een maand</span>
+    </h2>
+    <app-month-chart [chart]="facade.chart()" (monthSelected)="facade.showMonth($event)" />
+  </section>
+  <section class="card">
+    <h2>Uitgaven per categorie <span class="sub">· klik om te filteren</span></h2>
+    <app-category-breakdown
+      [rows]="facade.expenseCategories()"
+      [names]="names()"
+      [active]="facade.table().category"
+      (picked)="facade.toggleCategoryFilter($event)"
+    />
+  </section>
+</div>
+
+<div class="columns section">
+  <section class="card">
+    <h2>Vaste lasten <span class="sub">· automatisch herkend</span></h2>
+    <app-fixed-costs
+      [vm]="facade.fixedCosts()"
+      [names]="names()"
+      (exclusionToggled)="facade.toggleFixedCost($event)"
+    />
+  </section>
+  <section class="card">
+    <h2>Inkomsten per categorie</h2>
+    <app-category-breakdown
+      [rows]="facade.incomeCategories()"
+      [names]="names()"
+      [active]="facade.table().category"
+      (picked)="facade.toggleCategoryFilter($event)"
+    />
+    <h2 class="spaced">Grootste uitgaven per tegenpartij</h2>
+    <app-top-counterparties [rows]="facade.topCounterparties()" [names]="names()" />
+  </section>
+</div>
+
+@if (facade.ownAccounts().length) {
+  <section class="card section">
+    <h2>Eigen rekeningen <span class="sub">· overboekingen naar je andere rekeningen</span></h2>
+    <app-own-accounts
+      [accounts]="facade.ownAccounts()"
+      [catalog]="facade.catalog()"
+      [names]="names()"
+      [accountNames]="facade.settings().accountNames"
+      (rename)="facade.renameAccount($event.iban, $event.name)"
+      (categoryChange)="facade.setAccountCategory($event.key, $event.category)"
+      (ownerChange)="facade.setAccountOwner($event.key, $event.owner)"
+    />
+  </section>
+}
+
+<app-transaction-table
+  id="transacties"
+  class="card section"
+  [table]="facade.transactionTable()"
+  [filter]="facade.table()"
+  [catalog]="facade.catalog()"
+  [names]="names()"
+  [scope]="facade.overrideScope()"
+  (categoryChange)="changeCategory($event.tx, $event.category)"
+  (ownerChange)="changeOwner($event.tx, $event.owner)"
+  (createCategory)="openCategoryDialog($event)"
+  (filterChange)="facade.updateTable($event)"
+  (scopeChange)="setScope($event)"
+  (showMore)="facade.showMoreRows()"
+  (manageCategories)="openCategoryDialog(null)"
+  (resetOverrides)="resetOverrides()"
+/>
+
+<app-category-manager
+  [open]="categoryDialogOpen()"
+  [catalog]="facade.catalog()"
+  [names]="names()"
+  [preset]="categoryPreset()"
+  (created)="createCategory($event)"
+  (removed)="facade.removeCategory($event)"
+  (closed)="closeCategoryDialog()"
+/>

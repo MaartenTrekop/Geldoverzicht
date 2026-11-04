@@ -1,0 +1,83 @@
+<app-modal-dialog [heading]="heading()" [open]="open()" (closed)="closed.emit()">
+  <form class="form-grid" (submit)="submit($event)">
+    <label class="full">
+      Naam
+      <input
+        #nameInput
+        maxlength="30"
+        placeholder="Bijv. Vakantie, Buffer, Nieuwe auto"
+        [value]="name()"
+        (input)="name.set(nameInput.value)"
+      />
+    </label>
+    <label>
+      Doelbedrag (optioneel)
+      <input
+        #targetInput
+        inputmode="decimal"
+        placeholder="€ 3.000"
+        [value]="target()"
+        (input)="target.set(targetInput.value)"
+      />
+    </label>
+    <label>
+      Streefdatum (optioneel)
+      <input
+        #deadlineInput
+        type="month"
+        [value]="deadline()"
+        (input)="deadline.set(deadlineInput.value)"
+      />
+    </label>
+    <label>
+      Inleg per maand
+      <input
+        #monthlyInput
+        inputmode="decimal"
+        placeholder="€ 200"
+        [value]="monthly()"
+        (input)="monthly.set(monthlyInput.value)"
+      />
+    </label>
+    <label>
+      Van wie
+      <app-owner-select [value]="owner()" [names]="names()" (changed)="setOwner($event)" />
+    </label>
+    <label class="full">
+      Gekoppelde rekening
+      <select #accountInput (change)="linkedAccount.set(accountInput.value)">
+        <option value="" [selected]="!linkedAccount()">
+          Niet gekoppeld (saldo zelf bijhouden)
+        </option>
+        @for (account of accounts(); track account.iban) {
+          <option [value]="account.iban" [selected]="account.iban === linkedAccount()">
+            {{ account.label }}
+          </option>
+        }
+      </select>
+      <span class="hint">{{ accountHint() }}</span>
+    </label>
+    @if (!balanceFromExport()) {
+      <label class="full">
+        Huidig saldo
+        <input
+          #balanceInput
+          inputmode="decimal"
+          placeholder="€ 0"
+          [value]="balance()"
+          (input)="balance.set(balanceInput.value)"
+        />
+      </label>
+    }
+    @if (error()) {
+      <p class="error" role="alert">{{ error() }}</p>
+    }
+    <div class="actions">
+      @if (pot()) {
+        <button type="button" class="btn danger delete" (click)="remove()">Verwijderen</button>
+      }
+      <button type="button" class="btn" (click)="closed.emit()">Annuleren</button>
+      <button type="submit" class="btn primary">Opslaan</button>
+    </div>
+  </form>
+</app-modal-dialog>

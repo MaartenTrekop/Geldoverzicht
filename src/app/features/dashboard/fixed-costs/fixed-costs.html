@@ -1,0 +1,62 @@
+@let v = vm();
+
+@for (item of visible(); track item.key) {
+  <button
+    type="button"
+    class="list-row"
+    [class.excluded]="item.excluded"
+    [attr.aria-pressed]="!item.excluded"
+    [title]="
+      item.excluded
+        ? 'Telt niet mee — klik om weer mee te tellen'
+        : 'Klik om niet als vaste last te tellen'
+    "
+    (click)="exclusionToggled.emit(item.key)"
+  >
+    <span class="label">
+      {{ item.name }}
+      <app-owner-badge [owner]="item.owner" [names]="names()" />
+      <small>
+        {{ item.category
+        }}{{ item.monthly ? '' : ' · ' + item.monthsSeen + '× in ' + v.historyMonths + ' mnd' }}
+      </small>
+    </span>
+    <span class="num">
+      @if (!v.isMonth) {
+        {{ item.budgeted | euro: 2 }} <span class="muted">/ mnd</span>
+      } @else if (item.paid > 0) {
+        {{ item.paid | euro: 2 }} <span class="positive" title="Betaald">✓</span>
+      } @else {
+        <span class="muted"
+          >{{ item.typical | euro: 2 }} {{ v.isRunningMonth ? 'verwacht' : 'niet betaald' }}</span
+        >
+      }
+    </span>
+  </button>
+} @empty {
+  <p class="muted">Nog niet genoeg maanden om vaste lasten te herkennen.</p>
+}
+
+@if (hidden()) {
+  <p class="muted more">+ {{ hidden() }} andere</p>
+}
+
+@if (v.items.length) {
+  <div class="list-total">
+    @if (v.isMonth) {
+      <span
+        >Betaald{{ totals().expected > 0 ? ' · nog verwacht ' : ''
+        }}{{ totals().expected > 0 ? (totals().expected | euro) : '' }}</span
+      >
+      <span>{{ totals().paid | euro }}</span>
+    } @else {
+      <span>Totaal vaste lasten</span>
+      <span>{{ totals().paid | euro }} / mnd</span>
+    }
+  </div>
+}
+
+<p class="note">
+  Herkend aan een vast bedrag aan dezelfde partij in minstens 3 maanden. ✓ = deze maand betaald.
+  Klik op een regel om die niet als vaste last mee te tellen.
+</p>

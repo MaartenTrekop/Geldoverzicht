@@ -1,0 +1,39 @@
+:host {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+label {
+  font-size: 13px;
+  color: var(--muted);
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+select {
+  background: var(--card);
+  padding: 6px 9px;
+  border-radius: 9px;
+}
+
+.month {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  select {
+    font-size: 15px;
+    font-weight: 600;
+    min-width: 180px;
+    padding: 6px 10px;
+  }
+}
+
+.arrow {
+  padding: 6px 11px;
+  font-size: 16px;
+  line-height: 1;
+}

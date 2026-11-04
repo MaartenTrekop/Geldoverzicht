@@ -1,0 +1,39 @@
+<section class="drop" appFileDrop (filesDropped)="flow.importFiles($event)">
+  <h2>Sleep je Rabobank-export hierheen</h2>
+  <p class="lead">
+    CSV-bestand met transacties. Je kunt meerdere bestanden of rekeningen tegelijk toevoegen;
+    exports van ING werken ook.
+  </p>
+
+  <div class="actions">
+    <app-file-picker-button [primary]="true" (filesSelected)="flow.importFiles($event)">
+      Kies bestand
+    </app-file-picker-button>
+    <button type="button" class="btn" (click)="flow.showDemo()">Bekijk met voorbeelddata</button>
+  </div>
+
+  <p class="privacy">
+    🔒 Je bestand wordt alleen in deze browser verwerkt en bewaard. Er gaat niets naar een server.
+  </p>
+
+  @if (flow.errors().length) {
+    <ul class="errors" role="alert">
+      @for (error of flow.errors(); track error) {
+        <li>{{ error }}</li>
+      }
+    </ul>
+  }
+
+  <div class="howto">
+    <strong>Zo exporteer je bij de Rabobank</strong>
+    <ol>
+      <li>Log in op Rabo Internetbankieren op je computer (in de app gaat dit niet).</li>
+      <li>Ga naar <em>Downloads en documenten</em> → <em>Transacties downloaden</em>.</li>
+      <li>Kies je rekening(en), de periode en als formaat <em>CSV</em>.</li>
+    </ol>
+    <p>
+      Tip: exporteer je betaal- én spaarrekening samen. Overboekingen tussen je eigen rekeningen
+      worden dan herkend en niet als uitgave geteld. Elke maand voeg je gewoon de nieuwe export toe.
+    </p>
+  </div>
+</section>

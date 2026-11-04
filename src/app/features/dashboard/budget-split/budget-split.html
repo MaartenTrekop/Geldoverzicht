@@ -1,0 +1,166 @@
+@let s = split();
+
+<header class="head">
+  <h2>{{ heading() }}</h2>
+  <span class="sub">{{ subtitle() }}</span>
+  <span class="spacer"></span>
+  <span class="names">
+    Namen
+    <input
+      #name1
+      maxlength="20"
+      aria-label="Naam persoon 1"
+      [value]="names()[0]"
+      (change)="renamePerson(0, name1.value)"
+    />
+    <input
+      #name2
+      maxlength="20"
+      aria-label="Naam persoon 2"
+      [value]="names()[1]"
+      (change)="renamePerson(1, name2.value)"
+    />
+  </span>
+</header>
+
+<div class="layout">
+  <div class="waterfall">
+    <div class="list-row">
+      <div class="label">
+        Inkomen{{ isMonth() ? ' deze maand' : '' }}
+        @if (expectedText()) {
+          <small>{{ expectedText() }}</small>
+        }
+        @if (incomeBreakdown()) {
+          <small>{{ incomeBreakdown() }}</small>
+        }
+      </div>
+      <div class="num positive">{{ s.income.total | euro }}</div>
+    </div>
+    <div class="list-row">
+      <div class="label">
+        − Gezamenlijke vaste lasten
+        <small>
+          @if (!isMonth()) {
+            uit de lijst vaste lasten, zonder persoonlijke
+          } @else if (s.sharedFixedPending > 0) {
+            waarvan {{ s.sharedFixedPending | euro }} nog verwacht
+          } @else {
+            alles betaald
+          }
+        </small>
+      </div>
+      <div class="num">{{ s.sharedFixed | euro }}</div>
+    </div>
+    <div class="list-row">
+      <div class="label">
+        − Huishoudbudget
+        <small>
+          boodschappen e.d. · {{ isMonth() ? 'deze maand' : 'werkelijk' }}
+          {{ s.household.actual | euro }} · gem. {{ s.household.average | euro }}
+        </small>
+      </div>
+      <input
+        #household
+        class="amount"
+        inputmode="decimal"
+        aria-label="Huishoudbudget per maand"
+        title="Leeg laten = gemiddelde"
+        [value]="s.household.isCustom ? s.household.budget : ''"
+        [placeholder]="s.household.budget"
+        (change)="setHousehold(household.value)"
+      />
+    </div>
+    <div class="free">
+      <span>Vrije ruimte</span>
+      <span class="total" [class.positive]="s.free >= 0" [class.negative]="s.free < 0">{{
+        s.free | euro
+      }}</span>
+    </div>
+    @if (isMonth() && s.household.actual > s.household.budget + 1) {
+      <p class="warning">
+        Huishoudbudget {{ s.household.actual - s.household.budget | euro }} overschreden
+      </p>
+    }
+  </div>
+
+  <div>
+    <table class="lines">
+      <thead>
+        <tr>
+          <th>Pot</th>
+          <th class="num">
+            <app-segmented-control
+              label="Verdelen in"
+              [options]="modes"
+              [value]="mode()"
+              (valueChange)="setMode($event)"
+            />
+          </th>
+          <th class="num">Plan / mnd</th>
+          <th class="num">Werkelijk / mnd</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (line of lines(); track line.result.line) {
+          <tr>
+            <td>
+              <div class="line-name">{{ line.name }}</div>
+              @if (line.chips.length) {
+                <div class="chips">
+                  @for (chip of line.chips; track chip.label) {
+                    @if (chip.category) {
+                      <button
+                        type="button"
+                        class="pill"
+                        (click)="selectCategory(chip.category, line.owner)"
+                      >
+                        {{ chip.label }}
+                      </button>
+                    } @else {
+                      <span class="pill">{{ chip.label }}</span>
+                    }
+                  }
+                </div>
+              }
+              @if (line.note; as note) {
+                <div class="line-note" [class.negative]="note.warning">{{ note.text }}</div>
+              }
+            </td>
+            <td class="num">
+              <input
+                #value
+                class="amount small"
+                inputmode="decimal"
+                [attr.aria-label]="'Plan voor ' + line.name"
+                [value]="line.result.value"
+                (change)="setValue(line.result.line, value.value)"
+              />
+              {{ mode() === 'percent' ? '%' : '' }}
+            </td>
+            <td class="num">{{ line.result.planned | euro }}</td>
+            <td class="num">
+              {{ line.result.actual | euro }}
+              <app-progress-bar class="bar" [value]="line.ratio" [tone]="line.tone" />
+              <div class="status">{{ line.status }}</div>
+            </td>
+          </tr>
+        }
+        <tr>
+          <td class="muted">{{ s.unallocated >= 0 ? 'Nog niet verdeeld' : 'Te veel verdeeld' }}</td>
+          <td class="num muted">
+            {{ s.unallocatedPercent !== null ? s.unallocatedPercent + ' %' : '' }}
+          </td>
+          <td class="num" [class.negative]="s.unallocated < 0" [class.muted]="s.unallocated >= 0">
+            {{ s.unallocated | euro }}
+          </td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="note">
+      "Werkelijk" bij eigen geld zijn alle uitgaven die bij die persoon horen, ook persoonlijke
+      vaste lasten. Zet bij de transacties "Van wie" op een persoon of gebruik een eigen categorie.
+    </p>
+  </div>
+</div>

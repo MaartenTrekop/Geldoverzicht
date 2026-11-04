@@ -1,0 +1,79 @@
+.tools {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+
+  h2 {
+    margin: 0;
+  }
+
+  label {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--muted);
+  font-size: 12px;
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--line);
+
+  &.num {
+    text-align: right;
+  }
+}
+
+td {
+  padding: 7px 6px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+
+.date {
+  width: 96px;
+}
+
+.category {
+  width: 190px;
+}
+
+.owner {
+  width: 120px;
+}
+
+.description {
+  color: var(--muted);
+  font-size: 12px;
+  max-width: 440px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.empty {
+  padding: 18px 6px;
+}
+
+.more {
+  text-align: center;
+  margin-top: 12px;
+}
+
+@media (max-width: 760px) {
+  .date,
+  td:first-child {
+    display: none;
+  }
+}

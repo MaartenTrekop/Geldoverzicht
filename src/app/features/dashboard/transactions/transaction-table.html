@@ -1,0 +1,114 @@
+@let f = filter();
+
+<div class="tools">
+  <h2>Transacties</h2>
+  <span class="spacer"></span>
+  <input
+    #query
+    type="search"
+    placeholder="Zoek op naam of omschrijving"
+    aria-label="Zoeken"
+    [value]="f.query"
+    (input)="filterChange.emit({ query: query.value })"
+  />
+  <select
+    #category
+    aria-label="Filter op categorie"
+    (change)="filterChange.emit({ category: category.value })"
+  >
+    <option value="all" [selected]="f.category === 'all'">Alle categorieën</option>
+    @for (c of catalog().all; track c) {
+      <option [value]="c" [selected]="c === f.category">{{ c }}</option>
+    }
+  </select>
+  <app-owner-select
+    label="Filter op persoon"
+    allLabel="Iedereen"
+    [value]="f.owner"
+    [names]="names()"
+    (changed)="setOwnerFilter($event)"
+  />
+</div>
+
+<div class="tools">
+  <label class="sub">
+    Een wijziging geldt voor
+    <select #scopeSelect (change)="setScope(scopeSelect.value)">
+      <option value="counterparty" [selected]="scope() === 'counterparty'">
+        alle transacties van die tegenpartij
+      </option>
+      <option value="transaction" [selected]="scope() === 'transaction'">
+        alleen die ene transactie
+      </option>
+    </select>
+  </label>
+  <span class="spacer"></span>
+  <button type="button" class="btn" (click)="manageCategories.emit()">Eigen categorieën</button>
+  <button
+    type="button"
+    class="btn"
+    title="Zet alle handmatige categorieën en personen terug"
+    (click)="resetOverrides.emit()"
+  >
+    Aanpassingen wissen
+  </button>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th class="date">Datum</th>
+      <th>Tegenpartij</th>
+      <th class="category">Categorie</th>
+      <th class="owner">Van wie</th>
+      <th class="num">Bedrag</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (tx of table().rows; track tx.id) {
+      <tr>
+        <td class="muted">{{ tx.date | dutchDate }}</td>
+        <td>
+          <div>
+            {{ tx.displayName }}
+            @if (tx.overridden) {
+              <span class="pill">aangepast</span>
+            }
+          </div>
+          <div class="description" [title]="tx.description">{{ tx.description }}</div>
+        </td>
+        <td>
+          <app-category-select
+            [value]="tx.category"
+            [catalog]="catalog()"
+            [allowCreate]="true"
+            (changed)="categoryChange.emit({ tx: tx, category: $event })"
+            (createRequested)="createCategory.emit(tx)"
+          />
+        </td>
+        <td>
+          <app-owner-select [value]="tx.owner" [names]="names()" (changed)="setOwner(tx, $event)" />
+        </td>
+        <td class="num" [class.positive]="tx.amount > 0">{{ tx.amount | signedEuro }}</td>
+      </tr>
+    } @empty {
+      <tr>
+        <td colspan="5" class="muted empty">Geen transacties gevonden.</td>
+      </tr>
+    }
+  </tbody>
+</table>
+
+@if (remaining() > 0) {
+  <div class="more">
+    <button type="button" class="btn" (click)="showMore.emit()">
+      Toon meer ({{ remaining() }} over)
+    </button>
+  </div>
+}
+
+<p class="note">
+  Hoort een uitgave bij één persoon, zoals paarduitgaven of een hobby? Zet dan "Van wie" op die
+  persoon of maak een eigen categorie die bij die persoon hoort. Die uitgaven tellen dan mee in het
+  eigen geld van die persoon. Je aanpassingen worden in deze browser bewaard.
+</p>

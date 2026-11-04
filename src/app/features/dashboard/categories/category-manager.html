@@ -1,0 +1,59 @@
+<app-modal-dialog heading="Eigen categorieën" [open]="open()" (closed)="close()">
+  <p class="sub intro">
+    Bijvoorbeeld "Paard" voor één van jullie. Alles wat je in zo'n categorie zet, telt automatisch
+    mee bij die persoon.
+  </p>
+
+  <ul class="list">
+    @for (category of catalog().custom; track category.name) {
+      <li>
+        <span>
+          {{ category.name }}
+          <span class="sub">· {{ category.kind === 'income' ? 'inkomst' : 'uitgave' }}</span>
+          <app-owner-badge [owner]="category.owner" [names]="names()" />
+        </span>
+        <button type="button" class="link" (click)="removed.emit(category.name)">
+          Verwijderen
+        </button>
+      </li>
+    } @empty {
+      <li class="sub">Je hebt nog geen eigen categorieën.</li>
+    }
+  </ul>
+
+  <form class="form-grid" (submit)="submit($event)">
+    <label class="full">
+      Naam
+      <input
+        #nameInput
+        maxlength="30"
+        placeholder="Bijv. Paard"
+        [value]="name()"
+        (input)="name.set(nameInput.value)"
+      />
+    </label>
+    <label>
+      Soort
+      <select #kindSelect (change)="setKind(kindSelect.value)">
+        <option value="expense" [selected]="kind() === 'expense'">Uitgave</option>
+        <option value="income" [selected]="kind() === 'income'">Inkomst</option>
+      </select>
+    </label>
+    <label>
+      Hoort bij
+      <app-owner-select
+        label="Hoort bij"
+        [value]="owner()"
+        [names]="names()"
+        (changed)="setOwner($event)"
+      />
+    </label>
+    @if (error()) {
+      <p class="error" role="alert">{{ error() }}</p>
+    }
+    <div class="actions">
+      <button type="button" class="btn" (click)="close()">Sluiten</button>
+      <button type="submit" class="btn primary">Toevoegen</button>
+    </div>
+  </form>
+</app-modal-dialog>

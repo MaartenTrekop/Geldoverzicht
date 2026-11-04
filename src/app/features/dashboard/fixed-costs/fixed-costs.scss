@@ -1,0 +1,36 @@
+:host {
+  display: flex;
+  flex-direction: column;
+}
+
+.list-row {
+  width: 100%;
+  background: transparent;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  cursor: pointer;
+  text-align: left;
+
+  &:hover {
+    background: var(--chip);
+  }
+
+  &.excluded {
+    opacity: 0.4;
+
+    .label {
+      text-decoration: line-through;
+    }
+  }
+
+  small {
+    display: block;
+    margin: 1px 0 0;
+  }
+}
+
+.more {
+  font-size: 13px;
+  margin: 6px 2px;
+}

@@ -1,0 +1,124 @@
+:host {
+  display: block;
+}
+
+.chart {
+  position: relative;
+}
+
+svg {
+  display: block;
+  width: 100%;
+  overflow: visible;
+}
+
+.grid {
+  stroke: var(--line);
+
+  &.zero {
+    stroke-width: 1.5;
+  }
+}
+
+.axis {
+  font-size: 11px;
+  fill: var(--muted);
+}
+
+.month {
+  cursor: pointer;
+  outline: none;
+
+  .hit {
+    fill: transparent;
+  }
+
+  &:hover .hit,
+  &:focus-visible .hit {
+    fill: var(--chip);
+    fill-opacity: 0.6;
+  }
+
+  &.selected .hit {
+    fill: var(--chip);
+    fill-opacity: 1;
+  }
+
+  &.selected .label {
+    fill: var(--ink);
+    font-weight: 600;
+  }
+
+  &.dimmed .income,
+  &.dimmed .expenses {
+    opacity: 0.35;
+  }
+}
+
+.income {
+  fill: var(--income);
+}
+
+.expenses {
+  fill: var(--expense);
+}
+
+.leftover {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.dot {
+  fill: var(--ink);
+  pointer-events: none;
+}
+
+.tip {
+  position: absolute;
+  top: 0;
+  pointer-events: none;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 8px 10px;
+  font-size: 12.5px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.legend {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  font-size: 12.5px;
+  color: var(--muted);
+  margin-top: 8px;
+
+  i {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    margin-right: 6px;
+    vertical-align: -1px;
+
+    &.income {
+      background: var(--income);
+    }
+    &.expenses {
+      background: var(--expense);
+    }
+    &.line {
+      height: 2px;
+      border-radius: 0;
+      background: var(--ink);
+      vertical-align: 3px;
+    }
+  }
+}
