@@ -54,50 +54,56 @@
   </button>
 </div>
 
-<table>
-  <thead>
-    <tr>
-      <th class="date">Datum</th>
-      <th>Tegenpartij</th>
-      <th class="category">Categorie</th>
-      <th class="owner">Van wie</th>
-      <th class="num">Bedrag</th>
-    </tr>
-  </thead>
-  <tbody>
-    @for (tx of table().rows; track tx.id) {
+<div class="table-scroll">
+  <table>
+    <thead>
       <tr>
-        <td class="muted">{{ tx.date | dutchDate }}</td>
-        <td>
-          <div>
-            {{ tx.displayName }}
-            @if (tx.overridden) {
-              <span class="pill">aangepast</span>
-            }
-          </div>
-          <div class="description" [title]="tx.description">{{ tx.description }}</div>
-        </td>
-        <td>
-          <app-category-select
-            [value]="tx.category"
-            [catalog]="catalog()"
-            [allowCreate]="true"
-            (changed)="categoryChange.emit({ tx: tx, category: $event })"
-            (createRequested)="createCategory.emit(tx)"
-          />
-        </td>
-        <td>
-          <app-owner-select [value]="tx.owner" [names]="names()" (changed)="setOwner(tx, $event)" />
-        </td>
-        <td class="num" [class.positive]="tx.amount > 0">{{ tx.amount | signedEuro }}</td>
+        <th class="date">Datum</th>
+        <th>Tegenpartij</th>
+        <th class="category">Categorie</th>
+        <th class="owner">Van wie</th>
+        <th class="num">Bedrag</th>
       </tr>
-    } @empty {
-      <tr>
-        <td colspan="5" class="muted empty">Geen transacties gevonden.</td>
-      </tr>
-    }
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      @for (tx of table().rows; track tx.id) {
+        <tr>
+          <td class="muted">{{ tx.date | dutchDate }}</td>
+          <td>
+            <div>
+              {{ tx.displayName }}
+              @if (tx.overridden) {
+                <span class="pill">aangepast</span>
+              }
+            </div>
+            <div class="description" [title]="tx.description">{{ tx.description }}</div>
+          </td>
+          <td>
+            <app-category-select
+              [value]="tx.category"
+              [catalog]="catalog()"
+              [allowCreate]="true"
+              (changed)="categoryChange.emit({ tx: tx, category: $event })"
+              (createRequested)="createCategory.emit(tx)"
+            />
+          </td>
+          <td>
+            <app-owner-select
+              [value]="tx.owner"
+              [names]="names()"
+              (changed)="setOwner(tx, $event)"
+            />
+          </td>
+          <td class="num" [class.positive]="tx.amount > 0">{{ tx.amount | signedEuro }}</td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="5" class="muted empty">Geen transacties gevonden.</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
 
 @if (remaining() > 0) {
   <div class="more">

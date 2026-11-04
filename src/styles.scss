@@ -177,6 +177,11 @@ button.pill {
   flex: 1;
 }
 
+// Wraps tables that may be wider than a phone screen.
+.table-scroll {
+  overflow-x: auto;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;

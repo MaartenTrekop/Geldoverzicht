@@ -4,14 +4,14 @@
   gap: 12px;
 }
 
-.section {
-  display: block;
-}
-
 .columns {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+
+  > * {
+    min-width: 0;
+  }
 
   &.wide-left {
     grid-template-columns: 1.25fr 1fr;

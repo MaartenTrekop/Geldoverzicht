@@ -13,10 +13,10 @@
   (ownerChange)="setOwnerView($event)"
 />
 
-<app-kpi-summary class="section" [kpis]="facade.kpis()" />
+<app-kpi-summary [kpis]="facade.kpis()" />
 
 <app-budget-split
-  class="card section"
+  class="card"
   [split]="facade.budget()"
   [mode]="facade.settings().split.mode"
   [names]="names()"
@@ -32,7 +32,7 @@
 />
 
 <app-savings-pots
-  class="card section"
+  class="card"
   [pots]="facade.pots()"
   [accounts]="facade.linkableAccounts()"
   [exportedAccounts]="exportedAccounts()"
@@ -43,7 +43,7 @@
   (removed)="facade.removePot($event)"
 />
 
-<div class="columns wide-left section">
+<div class="columns wide-left">
   <section class="card">
     <h2>
       {{ period.mode === 'month' ? 'Afgelopen maanden' : 'Per maand' }} ·
@@ -62,7 +62,7 @@
   </section>
 </div>
 
-<div class="columns section">
+<div class="columns">
   <section class="card">
     <h2>Vaste lasten <span class="sub">· automatisch herkend</span></h2>
     <app-fixed-costs
@@ -85,7 +85,7 @@
 </div>
 
 @if (facade.ownAccounts().length) {
-  <section class="card section">
+  <section class="card">
     <h2>Eigen rekeningen <span class="sub">· overboekingen naar je andere rekeningen</span></h2>
     <app-own-accounts
       [accounts]="facade.ownAccounts()"
@@ -101,7 +101,7 @@
 
 <app-transaction-table
   id="transacties"
-  class="card section"
+  class="card"
   [table]="facade.transactionTable()"
   [filter]="facade.table()"
   [catalog]="facade.catalog()"
