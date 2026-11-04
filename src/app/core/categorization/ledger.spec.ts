@@ -22,6 +22,13 @@ describe('autoCategory', () => {
     );
   });
 
+  it('matches names with accented letters (JavaScript \\b treats é as a non-word character)', () => {
+    expect(autoCategory(bankTx({ counterpartyName: 'Café de Brug' }), context)).toBe(
+      'Eten & drinken',
+    );
+    expect(autoCategory(bankTx({ counterpartyName: 'Cafetaria Smit' }), context)).toBe('Overig');
+  });
+
   it('uses income rules for money coming in', () => {
     expect(autoCategory(bankTx({ amount: 3000, description: 'Salaris oktober' }), context)).toBe(
       'Salaris',

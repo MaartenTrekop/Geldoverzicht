@@ -57,7 +57,7 @@ export const EXPENSE_RULES: readonly CategoryRule[] = [
   ),
   rule(
     'Eten & drinken',
-    String.raw`thuisbezorgd|takeaway|uber ?eats|deliveroo|mcdonald|burger king|\bkfc\b|subway|domino|new york pizza|starbucks|coffee|koffie|\bcaf[eé]\b|restaurant|eetcaf|brasserie|bistro|pizzeria|sushi|lunchroom|bakker|febo|smullers|la place|vapiano`,
+    String.raw`thuisbezorgd|takeaway|uber ?eats|deliveroo|mcdonald|burger king|\bkfc\b|subway|domino|new york pizza|starbucks|coffee|koffie|\bcaf[eé](?![a-zà-ÿ])|restaurant|eetcaf|brasserie|bistro|pizzeria|sushi|lunchroom|bakker|febo|smullers|la place|vapiano`,
   ),
   rule(
     'Winkelen',
