@@ -32,3 +32,10 @@ jobs:
 
       - name: Production build
         run: npm run build
+
+      - name: Keep the build for inspection
+        uses: actions/upload-artifact@v7
+        with:
+          name: site
+          path: dist/geldoverzicht/browser
+          retention-days: 7
