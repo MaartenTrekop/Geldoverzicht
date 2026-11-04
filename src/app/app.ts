@@ -28,13 +28,13 @@ export class App {
   protected readonly confirmingStartOver = signal(false);
 
   protected async leaveDemo(): Promise<void> {
-    this.workspace.leaveDemo();
+    await this.workspace.leaveDemo();
     await this.router.navigate([this.workspace.hasData() ? '/overzicht' : '/']);
   }
 
   protected async startOver(): Promise<void> {
     this.confirmingStartOver.set(false);
-    this.workspace.startOver();
+    await this.workspace.startOver();
     this.toast.show('Transacties verwijderd');
     await this.router.navigate(['/']);
   }

@@ -1,55 +1,41 @@
-import { Injectable, computed, effect, inject, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { mergeTransactions } from '../core/import/bank-export';
 import { BankTransaction } from '../core/models/transaction';
-import { BrowserStorage } from './browser-storage';
-
-const STORAGE_KEY = 'geldoverzicht.transactions.v1';
-
-function isBankTransaction(value: unknown): value is BankTransaction {
-  if (typeof value !== 'object' || value === null) return false;
-  const t = value as Record<string, unknown>;
-  return (
-    typeof t['id'] === 'string' &&
-    typeof t['date'] === 'string' &&
-    typeof t['month'] === 'string' &&
-    typeof t['amount'] === 'number' &&
-    typeof t['account'] === 'string' &&
-    typeof t['counterpartyIban'] === 'string' &&
-    typeof t['counterpartyName'] === 'string' &&
-    typeof t['description'] === 'string' &&
-    typeof t['code'] === 'string'
-  );
-}
+import { PERSISTENCE } from './persistence/persistence';
 
 /**
- * Imported bank transactions. Kept in this browser so a new month's export can simply be
- * added; nothing is sent anywhere. Demo data is never stored.
+ * Imported bank transactions, kept through the configured persistence (browser storage, or
+ * the local database in development) so a new month's export can simply be added.
+ * Demo data is never stored.
  */
 @Injectable({ providedIn: 'root' })
 export class TransactionsStore {
-  private readonly storage = inject(BrowserStorage);
-  private readonly state = signal<readonly BankTransaction[]>(this.loadStored());
+  private readonly persistence = inject(PERSISTENCE);
+  private readonly state = signal<readonly BankTransaction[]>([]);
   private readonly demo = signal(false);
-  private readonly saveFailed = signal(false);
+  private readonly saveFailedState = signal(false);
 
   readonly transactions = this.state.asReadonly();
   readonly hasData = computed(() => this.state().length > 0);
   readonly isDemo = this.demo.asReadonly();
-  /** The browser refused to store the transactions (storage full or disabled). */
-  readonly notPersisted = this.saveFailed.asReadonly();
+  /** The last attempt to store or clear transactions failed. */
+  readonly saveFailed = this.saveFailedState.asReadonly();
 
-  constructor() {
-    effect(() => {
-      const transactions = this.state();
-      if (this.demo()) return;
-      if (transactions.length) this.saveFailed.set(!this.storage.write(STORAGE_KEY, transactions));
-      else this.storage.remove(STORAGE_KEY);
-    });
+  /** Reads the stored transactions. Throws when the storage cannot be reached. */
+  async load(): Promise<void> {
+    this.state.set(await this.persistence.loadTransactions());
   }
 
-  add(incoming: readonly BankTransaction[]): { added: number; duplicates: number } {
+  /**
+   * Adds transactions (skipping ones already present) and stores the new ones.
+   * They stay visible when storing fails; `saveFailed` tells the UI.
+   */
+  async add(incoming: readonly BankTransaction[]): Promise<{ added: number; duplicates: number }> {
     const result = mergeTransactions(this.state(), incoming);
     this.state.set(result.transactions);
+    if (!this.demo() && result.added) {
+      await this.track(this.persistence.addTransactions(result.transactions.slice(-result.added)));
+    }
     return { added: result.added, duplicates: result.duplicates };
   }
 
@@ -58,18 +44,30 @@ export class TransactionsStore {
     this.state.set(transactions);
   }
 
-  useStored(): void {
-    this.demo.set(false);
-    this.state.set(this.loadStored());
+  /** Leaves the demo and shows the stored transactions again. */
+  async useStored(): Promise<void> {
+    try {
+      await this.load();
+    } finally {
+      this.demo.set(false);
+    }
   }
 
-  clear(): void {
+  /** Removes all stored transactions (in the demo only the demo data is dropped). */
+  async clear(): Promise<void> {
+    const wasDemo = this.demo();
     this.demo.set(false);
     this.state.set([]);
+    if (!wasDemo) await this.track(this.persistence.clearTransactions());
   }
 
-  private loadStored(): BankTransaction[] {
-    const stored = this.storage.read(STORAGE_KEY);
-    return Array.isArray(stored) ? stored.filter(isBankTransaction) : [];
+  private async track(operation: Promise<void>): Promise<void> {
+    try {
+      await operation;
+      this.saveFailedState.set(false);
+    } catch (error) {
+      this.saveFailedState.set(true);
+      throw error;
+    }
   }
 }

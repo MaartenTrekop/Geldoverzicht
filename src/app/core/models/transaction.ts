@@ -35,3 +35,20 @@ export interface Transaction extends BankTransaction {
   /** True when the user changed the category or owner of this transaction or its counterparty. */
   readonly overridden: boolean;
 }
+
+/** Type guard for transactions read back from storage (localStorage or the local database). */
+export function isBankTransaction(value: unknown): value is BankTransaction {
+  if (typeof value !== 'object' || value === null) return false;
+  const t = value as Record<string, unknown>;
+  return (
+    typeof t['id'] === 'string' &&
+    typeof t['date'] === 'string' &&
+    typeof t['month'] === 'string' &&
+    typeof t['amount'] === 'number' &&
+    typeof t['account'] === 'string' &&
+    typeof t['counterpartyIban'] === 'string' &&
+    typeof t['counterpartyName'] === 'string' &&
+    typeof t['description'] === 'string' &&
+    typeof t['code'] === 'string'
+  );
+}

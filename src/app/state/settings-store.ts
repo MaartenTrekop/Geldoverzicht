@@ -1,26 +1,45 @@
 import { Injectable, effect, inject, signal } from '@angular/core';
-import { Settings, normalizeSettings } from '../core/models/settings';
-import { BrowserStorage } from './browser-storage';
-
-const STORAGE_KEY = 'geldoverzicht.settings.v1';
+import { DEFAULT_SETTINGS, Settings, normalizeSettings } from '../core/models/settings';
+import { PERSISTENCE } from './persistence/persistence';
 
 /**
  * The user's configuration (names, categories, overrides, budget plan, savings pots).
- * Persisted in the browser, except while the demo is shown.
+ * Saved through the configured persistence after every change, except while the demo is
+ * shown and except when loading failed (saving then could overwrite what is stored).
  */
 @Injectable({ providedIn: 'root' })
 export class SettingsStore {
-  private readonly storage = inject(BrowserStorage);
-  private readonly state = signal<Settings>(this.loadStored());
+  private readonly persistence = inject(PERSISTENCE);
+  private readonly state = signal<Settings>(DEFAULT_SETTINGS);
   private readonly demo = signal(false);
+  /** Only after a successful load are changes written back. */
+  private readonly loaded = signal(false);
+  private readonly saveFailedState = signal(false);
+  /** Saves run one after the other, so an older save never overwrites a newer one. */
+  private queue: Promise<void> = Promise.resolve();
 
   readonly settings = this.state.asReadonly();
+  readonly saveFailed = this.saveFailedState.asReadonly();
 
   constructor() {
     effect(() => {
       const settings = this.state();
-      if (!this.demo()) this.storage.write(STORAGE_KEY, settings);
+      if (!this.loaded() || this.demo()) return;
+      this.queue = this.queue
+        .then(() => this.persistence.saveSettings(settings))
+        .then(
+          () => this.saveFailedState.set(false),
+          () => this.saveFailedState.set(true),
+        );
     });
+  }
+
+  /** Reads the stored settings. Throws when the storage cannot be reached. */
+  async load(): Promise<void> {
+    this.loaded.set(false);
+    const stored = await this.persistence.loadSettings();
+    this.state.set(normalizeSettings(stored));
+    this.loaded.set(true);
   }
 
   /** Applies one of the pure updates from `core/settings/settings-updates`. */
@@ -34,13 +53,12 @@ export class SettingsStore {
     this.state.set(settings);
   }
 
-  /** Goes back to the stored settings. */
-  useStored(): void {
-    this.demo.set(false);
-    this.state.set(this.loadStored());
-  }
-
-  private loadStored(): Settings {
-    return normalizeSettings(this.storage.read(STORAGE_KEY));
+  /** Leaves the demo: the stored settings are loaded before saving is switched back on. */
+  async useStored(): Promise<void> {
+    try {
+      await this.load();
+    } finally {
+      this.demo.set(false);
+    }
   }
 }

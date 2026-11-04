@@ -2,6 +2,13 @@
   <a class="brand" routerLink="/">Geldoverzicht <span>· inkomsten &amp; uitgaven</span></a>
   @if (workspace.isDemo()) {
     <span class="pill demo">Voorbeelddata</span>
+  } @else if (workspace.storage === 'local-db') {
+    <span
+      class="pill local"
+      title="Transacties en instellingen staan in een SQLite-bestand op deze computer (server/, npm run api)"
+    >
+      Lokale database
+    </span>
   }
   <div class="spacer"></div>
   @if (workspace.hasData()) {
@@ -18,11 +25,8 @@
   }
 </header>
 
-@if (workspace.notPersisted()) {
-  <p class="warning" role="alert">
-    Je transacties konden niet in deze browser worden bewaard (opslag vol of uitgeschakeld). Ze
-    blijven zichtbaar tot je de pagina sluit.
-  </p>
+@if (workspace.storageProblem(); as problem) {
+  <p class="warning" role="alert">{{ problem }}</p>
 }
 
 <main>
@@ -37,8 +41,9 @@
   (closed)="confirmingStartOver.set(false)"
 >
   <p class="muted">
-    Je ingeladen transacties worden uit deze browser verwijderd. Namen, eigen categorieën, je
-    verdeling en spaarpotjes blijven bewaard.
+    Je ingeladen transacties worden verwijderd{{
+      workspace.storage === 'local-db' ? ' uit de lokale database' : ' uit deze browser'
+    }}. Namen, eigen categorieën, je verdeling en spaarpotjes blijven bewaard.
   </p>
   <div class="dialog-actions">
     <button type="button" class="btn" (click)="confirmingStartOver.set(false)">Annuleren</button>

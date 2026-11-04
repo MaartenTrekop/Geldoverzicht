@@ -26,10 +26,19 @@
   }
 }
 
+.demo,
+.local {
+  margin-left: 6px;
+}
+
 .demo {
   background: var(--savings-soft);
   color: var(--savings);
-  margin-left: 6px;
+}
+
+.local {
+  background: var(--income-soft);
+  color: var(--income);
 }
 
 .warning {
